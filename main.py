@@ -3,9 +3,9 @@ import random
 import time
 import os
 import matplotlib.pyplot as plt
-
 import sys
 
+# Increase the recursion limit to handle large arrays in recursive algorithms
 sys.setrecursionlimit(100000)
 
 # Importing the sorting algorithms from the sorts folder
@@ -169,14 +169,18 @@ def plot_results(times, array_type_name):
     plt.plot(sizes, times['Insertion Sort'], marker='d', label='Insertion Sort')
 
     plt.title(f'Sorting Algorithms Benchmark - {array_type_name}')
-    plt.xlabel('Array Size')
-    plt.ylabel('Time (seconds)')
+    plt.xlabel('Array Size (log scale)')
+    plt.ylabel('Time (seconds) (log scale)')
     plt.legend()
-    plt.grid(True)
+    plt.grid(True, which="both", ls="--", linewidth=0.5)
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xticks(sizes, labels=[f"{size:,}" for size in sizes], rotation=45)
     plt.tight_layout()
 
     # Save the plot to the results folder
-    filename = f"results/{array_type_name.replace(' ', '_').replace('%', '').replace('(', '').replace(')', '')}.png"
+    sanitized_name = array_type_name.replace(' ', '_').replace('%', '').replace('(', '').replace(')', '').replace('-', '_')
+    filename = f"results/{sanitized_name}.png"
     plt.savefig(filename)
     plt.close()
 
@@ -186,6 +190,7 @@ def plot_stalin_performance(all_results):
     for array_type_name, times in all_results.items():
         stalin_times[array_type_name] = times['Merciful Stalin Sort']
 
+    # Assuming all array types have the same sizes
     sizes = all_results[next(iter(all_results))]['sizes']
 
     plt.figure(figsize=(10, 6))
@@ -194,10 +199,13 @@ def plot_stalin_performance(all_results):
         plt.plot(sizes, stalin_times[array_type_name], marker='o', label=array_type_name)
 
     plt.title('Merciful Stalin Sort Performance on Different Array Types')
-    plt.xlabel('Array Size')
-    plt.ylabel('Time (seconds)')
+    plt.xlabel('Array Size (log scale)')
+    plt.ylabel('Time (seconds) (log scale)')
     plt.legend()
-    plt.grid(True)
+    plt.grid(True, which="both", ls="--", linewidth=0.5)
+    plt.xscale('log')
+    plt.yscale('log')
+    plt.xticks(sizes, labels=[f"{size:,}" for size in sizes], rotation=45)
     plt.tight_layout()
 
     # Save the plot to the results folder
