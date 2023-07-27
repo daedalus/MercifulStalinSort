@@ -2,7 +2,7 @@ import array
 from .helpers import merge_arrays
 
 # Merciful Stalin Sort
-def recursive_stalin_sort(arr):
+def merciful_stalin_sort(arr):
     if len(arr) <= 1:
         return arr[:]
 
@@ -24,7 +24,7 @@ def recursive_stalin_sort(arr):
         return arr[:]
 
     # Recursively sort array2
-    sorted_array2 = recursive_stalin_sort(array2)
+    sorted_array2 = merciful_stalin_sort(array2)
 
     # Merge array1 and sorted_array2
     sorted_arr = merge_arrays(array1, sorted_array2)

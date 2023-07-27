@@ -9,7 +9,7 @@ import sys
 sys.setrecursionlimit(100000)
 
 # Importing the sorting algorithms from the sorts folder
-from sorts.recursive_stalin_sort import recursive_stalin_sort
+from sorts.merciful_stalin_sort import merciful_stalin_sort
 from sorts.merge_sort import merge_sort
 from sorts.quick_sort import quick_sort
 from sorts.bubble_sort import bubble_sort
@@ -81,14 +81,14 @@ def benchmark_sorts():
             shuffle_percent = 0
 
         print(f"--- {array_type_name} ---")
-        header = f"{'Array Size':>10} | {'Recursive Stalin (s)':>20} | {'Merge Sort (s)':>15} | {'Quick Sort (s)':>15} | {'Bubble Sort (s)':>15} | {'Insertion Sort (s)':>18}"
+        header = f"{'Array Size':>10} | {'Merciful Stalin (s)':>20} | {'Merge Sort (s)':>15} | {'Quick Sort (s)':>15} | {'Bubble Sort (s)':>15} | {'Insertion Sort (s)':>18}"
         print(header)
         print("-" * len(header))
 
         # Initialize dictionaries to store times
         times = {
             'sizes': [],
-            'Recursive Stalin Sort': [],
+            'Merciful Stalin Sort': [],
             'Merge Sort': [],
             'Quick Sort': [],
             'Bubble Sort': [],
@@ -106,9 +106,9 @@ def benchmark_sorts():
             array_for_bubble = original_array[:]
             array_for_insertion = original_array[:]
 
-            # Timing Recursive Stalin Sort
+            # Timing Merciful Stalin Sort
             start_time = time.perf_counter()
-            sorted_stalin = recursive_stalin_sort(array_for_stalin)
+            sorted_stalin = merciful_stalin_sort(array_for_stalin)
             end_time = time.perf_counter()
             stalin_time = end_time - start_time
 
@@ -141,7 +141,7 @@ def benchmark_sorts():
 
             # Store times for plotting
             times['sizes'].append(size)
-            times['Recursive Stalin Sort'].append(stalin_time)
+            times['Merciful Stalin Sort'].append(stalin_time)
             times['Merge Sort'].append(merge_sort_time)
             times['Quick Sort'].append(quick_sort_time)
             times['Bubble Sort'].append(bubble_time)
@@ -155,14 +155,14 @@ def benchmark_sorts():
         # Plot and save the graph for this array type
         plot_results(times, array_type_name)
 
-    # Plot special graph for Recursive Stalin Sort performance
+    # Plot special graph for Merciful Stalin Sort performance
     plot_stalin_performance(all_results)
 
 def plot_results(times, array_type_name):
     sizes = times['sizes']
     plt.figure(figsize=(10, 6))
 
-    plt.plot(sizes, times['Recursive Stalin Sort'], marker='o', label='Recursive Stalin Sort')
+    plt.plot(sizes, times['Merciful Stalin Sort'], marker='o', label='Merciful Stalin Sort')
     plt.plot(sizes, times['Merge Sort'], marker='s', label='Merge Sort')
     plt.plot(sizes, times['Quick Sort'], marker='^', label='Quick Sort')
     plt.plot(sizes, times['Bubble Sort'], marker='x', label='Bubble Sort')
@@ -181,10 +181,10 @@ def plot_results(times, array_type_name):
     plt.close()
 
 def plot_stalin_performance(all_results):
-    # Extract times for Recursive Stalin Sort
+    # Extract times for Merciful Stalin Sort
     stalin_times = {}
     for array_type_name, times in all_results.items():
-        stalin_times[array_type_name] = times['Recursive Stalin Sort']
+        stalin_times[array_type_name] = times['Merciful Stalin Sort']
 
     sizes = all_results[next(iter(all_results))]['sizes']
 
@@ -193,7 +193,7 @@ def plot_stalin_performance(all_results):
     for array_type_name in stalin_times:
         plt.plot(sizes, stalin_times[array_type_name], marker='o', label=array_type_name)
 
-    plt.title('Recursive Stalin Sort Performance on Different Array Types')
+    plt.title('Merciful Stalin Sort Performance on Different Array Types')
     plt.xlabel('Array Size')
     plt.ylabel('Time (seconds)')
     plt.legend()
@@ -201,7 +201,7 @@ def plot_stalin_performance(all_results):
     plt.tight_layout()
 
     # Save the plot to the results folder
-    filename = "results/Recursive_Stalin_Sort_Performance.png"
+    filename = "results/Merciful_Stalin_Sort_Performance.png"
     plt.savefig(filename)
     plt.close()
 
