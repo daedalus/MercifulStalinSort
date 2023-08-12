@@ -147,6 +147,8 @@ def benchmark_sorts():
             times['Bubble Sort'].append(bubble_time)
             times['Insertion Sort'].append(insertion_time)
 
+            assert sorted_stalin == sorted_merge_sort
+
         print("\n")  # Add space between different array type benchmarks
 
         # Store results for this array type

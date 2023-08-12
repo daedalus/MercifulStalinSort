@@ -1,31 +1,47 @@
 import array
 from .helpers import merge_arrays
 
-# Merciful Stalin Sort
 def merciful_stalin_sort(arr):
     if len(arr) <= 1:
         return arr[:]
 
     typecode = arr.typecode
-    array1 = array.array(typecode)
-    array2 = array.array(typecode)
+
+    # Forward pass: Collect elements in order
+    forward_sorted = array.array(typecode)
+    forward_remaining = array.array(typecode)
 
     prev = None
-
     for elem in arr:
         if prev is None or elem >= prev:
-            array1.append(elem)
+            forward_sorted.append(elem)
             prev = elem
         else:
-            array2.append(elem)
+            forward_remaining.append(elem)
 
-    # If array2 is empty, the array is already sorted
-    if len(array2) == 0:
-        return arr[:]
+    # Backward pass: Collect elements in reverse order from the remaining elements
+    backward_sorted = array.array(typecode)
+    backward_remaining = array.array(typecode)
 
-    # Recursively sort array2
-    sorted_array2 = merciful_stalin_sort(array2)
+    prev = None
+    for elem in reversed(forward_remaining):
+        if prev is None or elem <= prev:
+            backward_sorted.append(elem)
+            prev = elem
+        else:
+            backward_remaining.append(elem)
 
-    # Merge array1 and sorted_array2
-    sorted_arr = merge_arrays(array1, sorted_array2)
-    return sorted_arr
+    backward_sorted.reverse()
+
+    # Merge sorted from forward and backward passes
+    merged_sorted = merge_arrays(forward_sorted, backward_sorted)
+
+    # If no remaining elements, return the merged sorted array
+    if len(backward_remaining) == 0:
+        return merged_sorted
+
+    # Recursively sort the remaining unsorted elements
+    sorted_remaining = merciful_stalin_sort(backward_remaining)
+
+    # Merge all sorted elements and return
+    return merge_arrays(merged_sorted, sorted_remaining)
