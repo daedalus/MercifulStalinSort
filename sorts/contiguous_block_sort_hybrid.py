@@ -84,4 +84,4 @@ def contiguous_block_sort_hybrid(L):
         return contiguous_range
     s, e = L[:start], L[end:]
     # Merge the three parts: left, contiguous range, and right
-    return quick_sort(merge_arrays(merge_arrays(s, contiguous_range), e))
+    return merge_sort(merge_arrays(merge_arrays(s, contiguous_range), e))
