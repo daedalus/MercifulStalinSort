@@ -14,6 +14,8 @@ from sorts.merge_sort import merge_sort
 from sorts.quick_sort import quick_sort
 from sorts.bubble_sort import bubble_sort
 from sorts.insertion_sort import insertion_sort
+from sorts.contiguous_block_sort_hybrid import contiguous_block_sort_hybrid
+from sorts.contiguous_block_sort_recursive import contiguous_block_sort_recursive
 
 def generate_arrays(size, array_type, shuffle_percent=0):
     """
@@ -81,7 +83,7 @@ def benchmark_sorts():
             shuffle_percent = 0
 
         print(f"--- {array_type_name} ---")
-        header = f"{'Array Size':>10} | {'Merciful Stalin (s)':>20} | {'Merge Sort (s)':>15} | {'Quick Sort (s)':>15} | {'Bubble Sort (s)':>15} | {'Insertion Sort (s)':>18}"
+        header = f"{'Array Size':>10} | {'Merciful Stalin (s)':>20} | {'Merge Sort (s)':>15} | {'Quick Sort (s)':>15} | {'Bubble Sort (s)':>15} | {'Insertion Sort (s)':>18} | {'Cb hybrid Sort (s)':>18} | {'Cb recursive Sort (s)':>18} | {'Tim Sort (s)':>18}"
         print(header)
         print("-" * len(header))
 
@@ -92,7 +94,10 @@ def benchmark_sorts():
             'Merge Sort': [],
             'Quick Sort': [],
             'Bubble Sort': [],
-            'Insertion Sort': []
+            'Insertion Sort': [],
+            'Contiguous block Sort (Hybrid)': [],
+            'Contiguous block Sort (Recursive)': [],
+            'Tim Sort': []
         }
 
         for size in sizes:
@@ -105,6 +110,9 @@ def benchmark_sorts():
             array_for_quick_sort = original_array[:]
             array_for_bubble = original_array[:]
             array_for_insertion = original_array[:]
+            array_for_contiguous_hybrid = original_array[:]
+            array_for_contiguous_recursive = original_array[:]
+            array_for_tim = original_array[:]
 
             # Timing Merciful Stalin Sort
             start_time = time.perf_counter()
@@ -136,8 +144,28 @@ def benchmark_sorts():
             end_time = time.perf_counter()
             insertion_time = end_time - start_time
 
+            # Timing Contiguous block Sort
+            start_time = time.perf_counter()
+            sorted_contiguous_hybrid = contiguous_block_sort_hybrid(array_for_contiguous_hybrid)
+            end_time = time.perf_counter()
+            contiguous_hybrid_time = end_time - start_time
+
+            # Timing Contiguous block Sort
+            start_time = time.perf_counter()
+            sorted_contiguous_recursive = contiguous_block_sort_recursive(array_for_contiguous_recursive)
+            end_time = time.perf_counter()
+            contiguous_recursive_time = end_time - start_time
+
+            # Timing Tim Sort
+            start_time = time.perf_counter()
+            sorted_tim = sorted(array_for_tim)
+            end_time = time.perf_counter()
+            tim_time = end_time - start_time
+
+
+
             # Printing the results
-            print(f"{size:>10,} | {stalin_time:>20.6f} | {merge_sort_time:>15.6f} | {quick_sort_time:>15.6f} | {bubble_time:>15.6f} | {insertion_time:>18.6f}")
+            print(f"{size:>10,} | {stalin_time:>20.6f} | {merge_sort_time:>15.6f} | {quick_sort_time:>15.6f} | {bubble_time:>15.6f} | {insertion_time:>18.6f} | {contiguous_hybrid_time:>18.6f} | {contiguous_recursive_time:>18.6f} | {tim_time:>18.6f}")
 
             # Store times for plotting
             times['sizes'].append(size)
@@ -146,6 +174,9 @@ def benchmark_sorts():
             times['Quick Sort'].append(quick_sort_time)
             times['Bubble Sort'].append(bubble_time)
             times['Insertion Sort'].append(insertion_time)
+            times['Contiguous block Sort (Hybrid)'].append(contiguous_hybrid_time)
+            times['Contiguous block Sort (Recursive)'].append(contiguous_recursive_time)
+            times['Tim Sort'].append(tim_time)
 
             assert sorted_stalin == sorted_merge_sort
 
@@ -158,7 +189,11 @@ def benchmark_sorts():
         plot_results(times, array_type_name)
 
     # Plot special graph for Merciful Stalin Sort performance
-    plot_stalin_performance(all_results)
+    #plot_stalin_performance(all_results)
+    plot_single_sort_performance(all_results, "Merciful Stalin Sort")
+    plot_single_sort_performance(all_results, "Contiguous block Sort (Hybrid)")
+    plot_single_sort_performance(all_results, "Contiguous block Sort (Recursive)")
+
 
 def plot_results(times, array_type_name):
     sizes = times['sizes']
@@ -169,6 +204,10 @@ def plot_results(times, array_type_name):
     plt.plot(sizes, times['Quick Sort'], marker='^', label='Quick Sort')
     plt.plot(sizes, times['Bubble Sort'], marker='x', label='Bubble Sort')
     plt.plot(sizes, times['Insertion Sort'], marker='d', label='Insertion Sort')
+    plt.plot(sizes, times['Contiguous block Sort (Hybrid)'], marker='o', label='Contiguous block Sort (Hybrid)')
+    plt.plot(sizes, times['Contiguous block Sort (Recursive)'], marker='p', label='Contiguous block Sort (Recursive)')
+    plt.plot(sizes, times['Tim Sort'], marker='*', label='Tim Sort (cpython)')
+
 
     plt.title(f'Sorting Algorithms Benchmark - {array_type_name}')
     plt.xlabel('Array Size (log scale)')
@@ -186,21 +225,21 @@ def plot_results(times, array_type_name):
     plt.savefig(filename)
     plt.close()
 
-def plot_stalin_performance(all_results):
+def plot_single_sort_performance(all_results, sort_key):
     # Extract times for Merciful Stalin Sort
-    stalin_times = {}
+    single_sort_times = {}
     for array_type_name, times in all_results.items():
-        stalin_times[array_type_name] = times['Merciful Stalin Sort']
+        single_sort_times[array_type_name] = times[sort_key]
 
     # Assuming all array types have the same sizes
     sizes = all_results[next(iter(all_results))]['sizes']
 
     plt.figure(figsize=(10, 6))
 
-    for array_type_name in stalin_times:
-        plt.plot(sizes, stalin_times[array_type_name], marker='o', label=array_type_name)
+    for array_type_name in single_sort_times:
+        plt.plot(sizes, single_sort_times[array_type_name], marker='o', label=array_type_name)
 
-    plt.title('Merciful Stalin Sort Performance on Different Array Types')
+    plt.title(f'{sort_key} Performance on Different Array Types')
     plt.xlabel('Array Size (log scale)')
     plt.ylabel('Time (seconds) (log scale)')
     plt.legend()
@@ -211,7 +250,7 @@ def plot_stalin_performance(all_results):
     plt.tight_layout()
 
     # Save the plot to the results folder
-    filename = "results/Merciful_Stalin_Sort_Performance.png"
+    filename = f"results/{sort_key.replace(' ','_').replace('(','').replace(')','')}_Performance.png"
     plt.savefig(filename)
     plt.close()
 
