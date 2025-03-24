@@ -1,6 +1,6 @@
 # Unified Analysis of Sorting Algorithms and Contiguous Block Sort Variants
 
-This report presents a comprehensive evaluation of various sorting algorithms, emphasizing performance across different input distributions. It covers classical methods (like Merge Sort, Quick Sort, Bubble Sort, Insertion Sort, Bucket Sort, and Tim Sort), adaptive or experimental methods (Merciful Stalin, Cb-based approaches), and a detailed analysis of the Contiguous Block Sort (CBS) implementations.
+This report presents a comprehensive evaluation of various sorting algorithms, emphasizing performance across different input distributions. It covers classical methods (like Merge Sort, Quick Sort, Bubble Sort, Insertion Sort, Bucket Sort, and Tim Sort), adaptive or experimental methods (Merciful Stalin, Contiguous Block Sort based approaches) implementations.
 
 ## 1. Benchmark Overview
 
@@ -29,7 +29,7 @@ The results show that algorithm performance is highly dependent on both the size
 
 **Hybrid Approaches:**
 
-- Cb Hybrid Sort is nearly on par with Quick and Merge Sort, while Cb Recursive Sort is significantly slower (e.g., around 26 s at 20,000 elements) likely due to recursive overhead.
+- Contiguous Block Sort Hybrid is nearly on par with Quick and Merge Sort, while Contiguous block Sort Recursive is significantly slower (e.g., around 26 s at 20,000 elements) likely due to recursive overhead.
 - Fib Shell Sort performs in the mid-range, similar to Quick/Merge Sort.
 
 ### Sorted Arrays
@@ -38,7 +38,7 @@ The results show that algorithm performance is highly dependent on both the size
 
 - Insertion Sort becomes exceptionally fast (e.g., 0.00001 s for small arrays and 0.0024 s at 20,000) due to its adaptiveness.
 - Tim Sort also excels because it takes advantage of pre-existing order.
-- Merciful Stalin and Cb Recursive Sort leverage the sorted structure for very low runtimes.
+- Merciful Stalin and Contiguous block Sort Recursive leverage the sorted structure for very low runtimes.
 
 **Quick Sort Issues:**
 
@@ -58,7 +58,7 @@ The results show that algorithm performance is highly dependent on both the size
 
 - Increasing disorder causes a rise in runtime for most algorithms.
 - Tim Sort shows near-constant, low runtimes due to its adaptive design.
-- Cb Hybrid Sort benefits from the partially sorted portions, though its performance slightly degrades as the unsorted percentage increases.
+- Contiguous block Sort Hybrid benefits from the partially sorted portions, though its performance slightly degrades as the unsorted percentage increases.
 - Quick Sort again exhibits sensitivity even with minor disorder, emphasizing the importance of a robust pivot strategy.
 
 ## 3. Novel and Hybrid Approaches
@@ -74,14 +74,14 @@ The results show that algorithm performance is highly dependent on both the size
 
 - Struggles with highly disordered data, especially at larger sizes.
 
-### Cb-Based Algorithms
+### Contiguous block Based Algorithms
 
-**Cb Hybrid Sort:**
+**Contiguous Block Sort Hybrid:**
 
 - Combines identification of the longest contiguous block (i.e., the already sorted part) with an efficient merge strategy.
 - It outperforms its recursive variant on most datasets.
 
-**Cb Recursive Sort:**
+**Contiguous Block Sort Recursive:**
 
 - Uses a divide-and-conquer approach to sort non-contiguous segments recursively.
 - While very fast on sorted data, it can become 2–3× slower than the hybrid version on random data due to recursion overhead.
@@ -100,11 +100,11 @@ The results show that algorithm performance is highly dependent on both the size
 
 - Bucket Sort excels with uniformly distributed data but is less optimal with clustered inputs, and Fib Shell Sort occupies a middle ground in performance.
 
-## 4. Detailed Analysis of Contiguous Block Sort (CBS)
+## 4. Detailed Analysis of Contiguous Block Sort
 
 ### Overview
 
-Contiguous Block Sort (CBS) is designed to leverage existing order within an array by first identifying the longest contiguous (sorted) subarray. The algorithm then focuses on sorting the remaining unsorted segments.
+Contiguous Block Sort is designed to leverage existing order within an array by first identifying the longest contiguous (sorted) subarray. The algorithm then focuses on sorting the remaining unsorted segments.
 
 ### Implementations
 
@@ -152,7 +152,7 @@ Contiguous Block Sort (CBS) is designed to leverage existing order within an arr
 **Adaptivity Matters:**
 
 - Algorithms like Tim Sort and Insertion Sort are extremely effective when dealing with nearly sorted or partially sorted data.
-- The CBS approaches and Merciful Stalin sort capitalize on existing order, showing impressive runtimes under favorable conditions.
+- The Contiguous Block Sort approaches and Merciful Stalin sort capitalize on existing order, showing impressive runtimes under favorable conditions.
 
 **Sensitivity of Quick Sort:**
 
@@ -164,15 +164,18 @@ Contiguous Block Sort (CBS) is designed to leverage existing order within an arr
 - **Stable Sorting**: Merge Sort is reliable with its consistent O(n log n) performance.
 - **Nearly Sorted Data**: Consider using Insertion Sort or Merciful Stalin sort.
 - **Uniformly Distributed Data**: Bucket Sort can be advantageous.
-- **Exploiting Contiguous Order**: CBS Hybrid is recommended over its recursive counterpart due to better handling of random inputs while still leveraging contiguous blocks.
+- **Exploiting Contiguous Order**: Contiguous Block Sort Hybrid is recommended over its recursive counterpart due to better handling of random inputs while still leveraging contiguous blocks.
 
 ## Conclusion
 
 This unified analysis illustrates that no single sorting algorithm is universally optimal. The choice depends on the input data's characteristics:
 
 - **Adaptive Algorithms** such as Tim Sort, Insertion Sort, and Merciful Stalin sort excel with pre-existing order.
-- **Divide-and-Conquer Algorithms** (Merge and Quick Sort) are effective for unsorted data, although Quick Sort requires careful pivot selection.
+- **Divide-and-Conquer Algorithms** (Merge and Quick Sort) are effective for unsorted data, although Quick Sort requires careful pivot selection,  suit general-purpose use.
 - **Contiguous Block Sort** variants provide an innovative strategy by exploiting the longest sorted segment. The Hybrid implementation is generally more efficient than the Recursive version, especially when the input lacks significant order.
+- **Hybrid approaches (Contiguous Block Sort Hybrid)** offer niche advantages for structured data.
+
+**Final Recommendation:** Prioritize Tim Sort for its adaptability and efficiency across diverse input types.
 
 By understanding the strengths and limitations of each approach, one can choose the most appropriate sorting strategy for a given scenario.
 
