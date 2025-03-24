@@ -1,120 +1,178 @@
-# Merciful Stalin Sort
+# Unified Analysis of Sorting Algorithms and Contiguous Block Sort Variants
 
-The **Merciful Stalin Sort** is a new sorting algorithm inspired by the infamous [Stalin Sort](https://en.wikipedia.org/wiki/Sorting_algorithm#Stalin_sort). While experimenting with Stalin Sort as a playful exercise, an intriguing idea emerged: instead of discarding out-of-order elements, what if we **retained the in-order elements and recursively sorted the rest**? The logic was that by reducing the size of the array needing sorting, we could achieve performance gains, especially on partially sorted arrays. This led to the development of the Merciful Stalin Sort.
+This report presents a comprehensive evaluation of various sorting algorithms, emphasizing performance across different input distributions. It covers classical methods (like Merge Sort, Quick Sort, Bubble Sort, Insertion Sort, Bucket Sort, and Tim Sort), adaptive or experimental methods (Merciful Stalin, Cb-based approaches), and a detailed analysis of the Contiguous Block Sort (CBS) implementations.
 
-## Development and Concept
+## 1. Benchmark Overview
 
-The original Stalin Sort operates by iterating through an array and eliminating any element that is out of order, effectively "purging" it to produce a sorted array of the remaining elements. This extreme approach, while humorous, is not useful for most practical uses.
+The benchmark measures runtime (in seconds) on arrays with sizes from 100 up to 20,000 elements, using a variety of input distributions:
 
-In developing the Merciful Stalin Sort (see commit history), the initial implementation involved a single forward pass through the array, collecting elements that were in ascending order and recursively sorting the out-of-order elements. However, this approach was inefficient for arrays that were sorted in reverse order, as it resulted in extensive recursion and poor performance.
+- **Random Order**: No inherent order exists.
+- **Sorted Order**: The data is pre-arranged in order.
+- **Reverse Sorted Order**: Data is sorted in descending order.
+- **Partially Sorted**: Arrays with varying degrees of disorder (e.g., 10%, 30%, 50% unsorted).
 
-To address this, the algorithm was enhanced by adding a **backward pass**. After the forward pass collects elements in ascending order, the backward pass iterates through the remaining elements in reverse, collecting elements that are in descending order. This addition significantly improved performance on reverse-sorted arrays by reducing the depth of recursion and handling both increasing and decreasing sequences within the array.
+The results show that algorithm performance is highly dependent on both the size and the order of the input data.
 
-## Algorithm Overview
+## 2. Performance Analysis by Input Type
 
-The Merciful Stalin Sort operates in three main phases:
+### Random Arrays
 
-1. **Forward Pass**: Iterate through the array from the beginning, retaining elements that are in ascending order. Out-of-order elements are collected into a separate array.
+**Fast Performers:**
 
-2. **Backward Pass**: Iterate through the out-of-order elements from the end, retaining elements that are in descending order. Remaining elements are collected into another array.
+- Tim Sort and Bucket Sort are extremely fast. For instance, Tim Sort handles 20,000 elements in roughly 0.002 seconds.
+- Quick Sort and Merge Sort also perform well, though Quick Sort (0.027 s at 20,000 elements) has a slight edge.
 
-3. **Merge and Recursive Sort**: Merge the sorted elements from the forward and backward passes. If there are remaining unsorted elements, recursively apply the Merciful Stalin Sort to them and merge the result with the previously merged array.
+**Slower Algorithms:**
 
-This algorithm reduces the problem size by sorting smaller subsets of the array and merging them, similar to merge sort. The addition of the backward pass allows the algorithm to handle both ascending and descending sequences effectively.
+- Bubble Sort and Insertion Sort dramatically slow down as array size increases, with Bubble Sort taking over 18 seconds and Insertion Sort over 7 seconds at 20,000 elements.
+- Merciful Stalin shows competitive times (0.528 s at 20,000) but scales less efficiently than the divide-and-conquer algorithms.
 
+**Hybrid Approaches:**
 
-## Time Complexity Analysis
+- Cb Hybrid Sort is nearly on par with Quick and Merge Sort, while Cb Recursive Sort is significantly slower (e.g., around 26 s at 20,000 elements) likely due to recursive overhead.
+- Fib Shell Sort performs in the mid-range, similar to Quick/Merge Sort.
 
-### Best Case: O(n)
+### Sorted Arrays
 
-The best-case scenario occurs when the array is already sorted in either ascending or descending order. In this case, the forward pass or backward pass will collect all elements into the sorted array without any remaining elements to sort recursively. The algorithm performs a single pass through the array, resulting in linear time complexity.
+**Adaptive Algorithms Shine:**
 
-### Average Case and Worst Case: O(n log n)
+- Insertion Sort becomes exceptionally fast (e.g., 0.00001 s for small arrays and 0.0024 s at 20,000) due to its adaptiveness.
+- Tim Sort also excels because it takes advantage of pre-existing order.
+- Merciful Stalin and Cb Recursive Sort leverage the sorted structure for very low runtimes.
 
-In the average case and worst case, the array contains a mix of ordered and unordered elements. The algorithm reduces the size of the problem at each recursive call by collecting in-order elements during the forward and backward passes. Each level of recursion handles a fraction of the array, and the depth of the recursion tree is logarithmic relative to the number of elements.
+**Quick Sort Issues:**
 
-At each recursive call, the array is partitioned into three parts:
+- Quick Sort shows poor performance on sorted inputs (e.g., 21.5 s at 20,000), highlighting issues with pivot selection.
 
-- **Forward-Sorted Elements**: Elements collected during the forward pass.
-- **Backward-Sorted Elements**: Elements collected during the backward pass.
-- **Remaining Unsorted Elements**: Elements that were not collected during either pass.
+### Reverse Sorted Arrays
 
-Assuming that the forward and backward passes collectively collect a constant fraction of the elements, the size of the remaining unsorted portion decreases geometrically with each recursive call. This results in a recursion depth of O(log n).
+**Degradation in Performance:**
 
-At each level of recursion, the algorithm performs O(n) work:
+- Quick Sort again suffers (e.g., 13.33 s at 20,000) with reverse order input.
+- Merge Sort remains stable (~0.03 s at 20,000), as it is not sensitive to input order.
+- Adaptive methods (Insertion Sort, Merciful Stalin) improve but still lag behind the best performers.
 
-- The forward and backward passes each take O(n) time.
-- Merging the sorted arrays also takes O(n) time.
+### Partially Sorted Arrays
 
-Therefore, the total time complexity is O(n log n), as the O(n) work is performed at each of the O(log n) levels of recursion.
+**General Trend:**
 
-**NB:** It is impossible for an array to have all elements unordered in both the forward and backward passes simultaneously. This inherent design ensures that each pass successfully reduces the size of the unsorted portion of the array geometrically, preventing an O(n²) runtime and maintaining the algorithm's efficiency by ensuring progress is made at every recursive step.
+- Increasing disorder causes a rise in runtime for most algorithms.
+- Tim Sort shows near-constant, low runtimes due to its adaptive design.
+- Cb Hybrid Sort benefits from the partially sorted portions, though its performance slightly degrades as the unsorted percentage increases.
+- Quick Sort again exhibits sensitivity even with minor disorder, emphasizing the importance of a robust pivot strategy.
 
-## Empirical Results and Analysis
+## 3. Novel and Hybrid Approaches
 
-Comprehensive benchmarking was conducted to evaluate the performance of the Merciful Stalin Sort against traditional sorting algorithms: Merge Sort, Quick Sort, Bubble Sort, Insertion Sort
+### Merciful Stalin Sort
 
-Arrays of varying sizes and initial orders were used: Random Arrays, Sorted Arrays, Reverse-Sorted Arrays, Partially Sorted Arrays with 10%, 30%, and 50% unsorted elements
+**Strengths:**
 
-**Detailed benchmarking results can be found in `results.txt`.**
+- Very efficient on nearly sorted and completely sorted data.
+- Competitive on random arrays but generally outperformed by adaptive or divide-and-conquer strategies.
 
-#### Random Arrays
+**Limitations:**
 
-![Random Arrays Performance](results/Random_Array.png)
+- Struggles with highly disordered data, especially at larger sizes.
 
-In random arrays, the Merciful Stalin Sort underperforms compared to Merge Sort and Quick Sort. The overhead from the forward and backward passes, along with recursive calls, contributes to its inefficiency on unsorted data. The graph shows that as the array size increases, the execution time of Merciful Stalin Sort grows more rapidly than that of Merge Sort and Quick Sort. However, it outperforms Bubble Sort and Insertion Sort, particularly on larger arrays.
+### Cb-Based Algorithms
 
-#### Sorted Arrays
+**Cb Hybrid Sort:**
 
-![Sorted Arrays Performance](results/Sorted_Array.png)
+- Combines identification of the longest contiguous block (i.e., the already sorted part) with an efficient merge strategy.
+- It outperforms its recursive variant on most datasets.
 
-On sorted arrays, the algorithm performs efficiently, comparable to Insertion Sort. The forward pass collects all elements, and no recursive calls are necessary, resulting in linear time complexity. The graph indicates minimal execution times that grow linearly with the array size, demonstrating the algorithm's efficiency in this scenario.
+**Cb Recursive Sort:**
 
-#### Reverse-Sorted Arrays
+- Uses a divide-and-conquer approach to sort non-contiguous segments recursively.
+- While very fast on sorted data, it can become 2–3× slower than the hybrid version on random data due to recursion overhead.
 
-![Reverse-Sorted Arrays Performance](results/Reverse_Sorted_Array.png)
+### Other Classic Algorithms
 
-Similar to a sorted array, the backward pass efficiently collects all elements in descending order, minimizing recursive calls. The performance is similar to that on sorted arrays, as reflected in the graph, where execution times remain low and scale linearly with the array size.
+**Bubble Sort and Insertion Sort:**
 
-Note: Without the backward pass, this senario was the worst case for Merciful Stalin sort where it even underperformed Bubble Sort and Insertion Sort.
+- Bubble Sort is consistently slow for large arrays, and Insertion Sort, while adaptive, only excels on nearly sorted datasets.
 
-#### Partially Sorted Arrays
+**Merge Sort and Quick Sort:**
 
-|10% Unsorted|30% Unsorted|50% Unsorted|
-|:-:|:-:|:-:|
-|![Partial Sorted 10% Unsorted Performance](results/Partial_Sorted_10_Unsorted.png)|![Partial Sorted 30% Unsorted Performance](results/Partial_Sorted_30_Unsorted.png)|![Partial Sorted 50% Unsorted Performance](results/Partial_Sorted_50_Unsorted.png)|
+- Provide reliable O(n log n) performance on average, though Quick Sort’s worst-case scenario (particularly on sorted inputs) reveals weaknesses in pivot selection.
 
-The algorithm shows improved performance as the degree of sortedness increases. It benefits from the initial passes collecting larger sorted sequences, reducing the size of the arrays needing recursive sorting. Merciful Stalin Sort seems to performs better with fewer unsorted elements. For an array with only 10% unsorted elements, it even rivals Merge Sort, however as the sortedness of an array decreases, it starts to lags behind Merge Sort and Quick Sort, which are less sensitive to initial ordering.
+**Bucket Sort and Fib Shell Sort:**
 
-### Performance of Merciful Stalin Sort
+- Bucket Sort excels with uniformly distributed data but is less optimal with clustered inputs, and Fib Shell Sort occupies a middle ground in performance.
 
-![Merciful Stalin Sort Performance](results/Merciful_Stalin_Sort_Performance.png)
-*The graph illustrates the execution time of Merciful Stalin Sort across different array types and sizes. Logarithmic scales are used for clarity.*
+## 4. Detailed Analysis of Contiguous Block Sort (CBS)
 
-The empirical results indicate that while the Merciful Stalin Sort slightly benefits from the initial ordering of elements, it cannot match the efficiency of algorithms like Merge Sort and Quick Sort on large or randomly ordered datasets. The overhead of multiple passes and recursive calls becomes significant as the array size increases. Furthermore, the for each recursive call, the algorithm is not able to elementate sufficient elements to make any meaningful performance gains. 
+### Overview
 
-In comparison with Bubble Sort and Insertion Sort, the Merciful Stalin Sort performs better on larger arrays, particularly when the array is partially sorted. This highlights its relatively better average-case performance compared to these simple sorting algorithms.
+Contiguous Block Sort (CBS) is designed to leverage existing order within an array by first identifying the longest contiguous (sorted) subarray. The algorithm then focuses on sorting the remaining unsorted segments.
 
+### Implementations
 
-## Potential Improvements
+**Hybrid Implementation**
 
-### Heuristic-Based Pass Direction
+**Mechanism:**
 
-Incorporate a heuristic to determine whether to perform a forward pass, a backward pass, or both by assessing the array's overall orderliness or calculating a "sortedness score" based on adjacent element comparisons. For instance, counting the number of ascending versus descending pairs can help decide the most efficient pass direction, reducing unnecessary computations and optimizing performance for arrays with clear directional trends.
+- Identifies the longest contiguous block.
+- Uses a hybrid approach that incorporates Merge Sort to sort the remaining segments.
 
-### Adaptive Starting Point
+**Runtime Complexity:**
 
-Optimize the initial passes by starting from the array's midpoint and moving outward, particularly for arrays with specific patterns such as increasing sequences towards the ends or a central peak. By identifying the index of the maximum or minimum element, the algorithm can adaptively choose where to begin, maximizing the number of in-order elements collected during the initial passes and thereby reducing recursion depth and overall execution time.
+- Best Case: O(n) when the entire array is contiguous.
+- Average/Worst Case: O(n log n) as the need for merging increases with disorder.
 
+**Recursive Implementation**
+
+**Mechanism:**
+
+- Also identifies the longest contiguous block.
+- Applies a recursive divide-and-conquer approach to handle non-contiguous segments.
+
+**Runtime Complexity:**
+
+- Best Case: O(n) for fully contiguous arrays.
+- Average Case: O(n log n).
+- Worst Case: O(n²) when minimal contiguous segments force extensive recursive processing.
+
+### Comparative Complexity Table
+
+| Algorithm                         | Best Case    | Average Case | Worst Case   | 	Key Characteristics
+|-----------------------------------|--------------|--------------|--------------|-----------------------------------------------------
+| Tim Sort                          | O(n)         | O(n log n)   | O(n log n)   | Adaptive; exploits pre-sorted runs.
+| Bubble Sort                       | O(n)         | O(n²)        | O(n²)        | Pivot-sensitive; poor on sorted/reverse-sorted data.
+| Insertion Sort                    | O(n)         | O(n²)        | O(n²)        | Fast for nearly sorted data.
+| Merge Sort                        | O(n log n)   | O(n log n)   | O(n log n)   | Stable, consistent performance.
+| Quick Sort                        | O(n log n)   | O(n log n)   | O(n²)        | Pivot-sensitive; poor on sorted/reverse-sorted data.
+| Contiguous Block Sort (Hybrid)    | O(n)         | O(n log n)   | O(n log n)   | Uses Merge Sort for merging; efficient with blocks.
+| Contiguous Block Sort (Recursive) | O(n)         | O(n log n)   | O(n²)        | Recursive overhead in disordered data.
+| Merciful Stalin Sort              | O(n)         | O(n log n)   | O(n log n)   | Retains in-order elements; recursive on outliers.
+| Fib Shell Sort	                | O(n log n)   | O(n log n)	  | O(n²)        | Gap sequence-based; mid-tier performer.
+
+## 5. Comparative Observations and Recommendations
+
+**Adaptivity Matters:**
+
+- Algorithms like Tim Sort and Insertion Sort are extremely effective when dealing with nearly sorted or partially sorted data.
+- The CBS approaches and Merciful Stalin sort capitalize on existing order, showing impressive runtimes under favorable conditions.
+
+**Sensitivity of Quick Sort:**
+
+- Quick Sort’s performance drastically deteriorates on sorted or reverse sorted data if the pivot selection is not optimal.
+
+**Choosing the Right Tool:**
+
+- **General Use**: Tim Sort offers a robust, adaptive solution for mixed data.
+- **Stable Sorting**: Merge Sort is reliable with its consistent O(n log n) performance.
+- **Nearly Sorted Data**: Consider using Insertion Sort or Merciful Stalin sort.
+- **Uniformly Distributed Data**: Bucket Sort can be advantageous.
+- **Exploiting Contiguous Order**: CBS Hybrid is recommended over its recursive counterpart due to better handling of random inputs while still leveraging contiguous blocks.
 
 ## Conclusion
 
-The Merciful Stalin Sort introduces an interesting concept by attempting to optimize sorting through selective element retention and recursion. However, empirical testing indicates that it does not outperform traditional sorting algorithms for most general usecases. The algorithm excels when the array is already sorted, partially sorted or reverse-sorted manner but struggles with random data.
+This unified analysis illustrates that no single sorting algorithm is universally optimal. The choice depends on the input data's characteristics:
 
-## Like My Work?
+- **Adaptive Algorithms** such as Tim Sort, Insertion Sort, and Merciful Stalin sort excel with pre-existing order.
+- **Divide-and-Conquer Algorithms** (Merge and Quick Sort) are effective for unsorted data, although Quick Sort requires careful pivot selection.
+- **Contiguous Block Sort** variants provide an innovative strategy by exploiting the longest sorted segment. The Hybrid implementation is generally more efficient than the Recursive version, especially when the input lacks significant order.
 
-If you find this to be a cool algorithm or like the analysis, please consider giving it a star on GitHub! 🌟
+By understanding the strengths and limitations of each approach, one can choose the most appropriate sorting strategy for a given scenario.
 
-If you'd like to improve this project, feel free to submit a pull request or open an issue 🚀 Collaboration and feedback are always welcome.
-
-If you just have a question or want to talk, don't hesitate to reach out! 💬✨
